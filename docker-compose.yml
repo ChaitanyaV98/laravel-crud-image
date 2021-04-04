@@ -1,0 +1,39 @@
+version: "3"
+services:
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - "3060:80"
+    depends_on:
+      - src
+
+  mysql:
+    image: mysql:latest
+    container_name: databasemysql
+    restart: unless-stopped
+
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: employeeDatabase
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+
+      MYSQL_RANDOM_ROOT_PASSWORD: betalectic
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+      MYSQL_ENTRYPOINT_INITD: ./mysql/docker-entrypoint-initdb.d
+  src:
+    stdin_open: true
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./src
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
